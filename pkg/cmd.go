@@ -21,6 +21,7 @@ type options struct {
 	goVersion    string
 	version      string
 	rootPackage  string
+	timeout      string
 }
 
 const (
@@ -65,6 +66,7 @@ func NewCmdGoReleaser() *cobra.Command {
 	cmd.Flags().StringVarP(&o.version, version, "", "", "version")
 	cmd.Flags().StringVarP(&o.goVersion, goVersion, "", "", "go version")
 	cmd.Flags().StringVarP(&o.rootPackage, rootPackage, "", "", "root package")
+	cmd.Flags().StringVarP(&o.timeout, "timeout", "", "200m", "timeout")
 	o.Cmd = cmd
 
 	return cmd

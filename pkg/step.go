@@ -72,7 +72,7 @@ func (o *options) goReleaser() error {
 
 	o.Runner.SetName("goreleaser")
 
-	args := []string{"release", "--config=.goreleaser.yml", "--rm-dist", "--release-notes=./changelog.md", "--skip-validate"}
+	args := []string{"release", "--config=.goreleaser.yml", "--rm-dist", "--release-notes=./changelog.md", "--skip-validate", "--timeout", o.timeout}
 	o.Runner.SetArgs(args)
 
 	if o.CommandRunner == nil {

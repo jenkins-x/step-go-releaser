@@ -126,7 +126,7 @@ darwin: ## Build for OSX
 	chmod +x build/darwin/$(NAME)
 
 .PHONY: release
-release: clean build test
+release: clean build test linux
 	git fetch origin refs/tags/v$(VERSION)
 	#jx step changelog --verbose --header-file=hack/changelog-header.md --version=$(VERSION) --rev=$(PULL_BASE_SHA) --output-markdown=changelog.md --update-release=false
 	# TODO this fails for some reason!
