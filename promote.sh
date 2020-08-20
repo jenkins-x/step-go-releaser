@@ -2,4 +2,4 @@
 
 echo "promoting the new version ${VERSION} to downstream repositories"
 
-#jx step create pr go --name github.com/jenkins-x/step-go-releaser --version ${VERSION} --build "make build" --repo https://github.com/jenkins-x-labs/jxl.git
+jx step create pr regex --regex 'version: (.*)' --version ${VERSION} --files docker/gcr.io/jenkinsxio/step-go-releaser.yml --repo https://github.com/jenkins-x/jxr-versions.git
