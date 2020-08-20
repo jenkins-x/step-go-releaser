@@ -5,10 +5,10 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/jenkins-x/jx/pkg/util"
-
-	"github.com/jenkins-x/jx/pkg/cmd/clients"
-	"github.com/jenkins-x/jx/pkg/cmd/opts"
+	"github.com/jenkins-x/jx-api/pkg/util"
+	"github.com/jenkins-x/jx-helpers/pkg/cmdrunner"
+	"github.com/jenkins-x/jx-helpers/pkg/kube"
+	opts "github.com/jenkins-x/jx-helpers/pkg/options"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/pkg/errors"
@@ -24,34 +24,32 @@ const (
 
 // Run implements the command
 func (o *options) Run() error {
+	var err error
+	o.KubeClient, o.Namespace, err = kube.LazyCreateKubeClientAndNamespace(o.KubeClient, o.Namespace)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create kube Client")
+	}
+
 	if o.organisation == "" {
-		return util.MissingArgument(organisation)
+		return opts.MissingOption(organisation)
 	}
 	if o.revision == "" {
-		return util.MissingArgument(revision)
+		return opts.MissingOption(revision)
 	}
 	if o.branch == "" {
-		return util.MissingArgument(branch)
+		return opts.MissingOption(branch)
 	}
 	if o.version == "" {
-		return util.MissingArgument(version)
+		return opts.MissingOption(version)
 	}
 	if o.buildDate == "" {
-		return util.MissingArgument(buildDate)
+		return opts.MissingOption(buildDate)
 	}
 	if o.goVersion == "" {
-		return util.MissingArgument(goVersion)
+		return opts.MissingOption(goVersion)
 	}
 	if o.rootPackage == "" {
-		return util.MissingArgument(rootPackage)
-	}
-
-	f := clients.NewFactory()
-	o.CommonOptions = opts.NewCommonOptionsWithTerm(f, os.Stdin, os.Stdout, os.Stderr)
-
-	o.Runner = &util.Command{
-		Out: o.Out,
-		Err: o.Err,
+		return opts.MissingOption(rootPackage)
 	}
 
 	return o.goReleaser()
@@ -76,18 +74,18 @@ func (o *options) goReleaser() error {
 
 	args := []string{"release", "--config=.goreleaser.yml", "--rm-dist", "--release-notes=./changelog.md", "--skip-validate"}
 	o.Runner.SetArgs(args)
-	o.Out = os.Stdout
-	o.Err = os.Stderr
-	_, err = o.run()
 
+	if o.CommandRunner == nil {
+		o.CommandRunner = cmdrunner.DefaultCommandRunner
+	}
+
+	_, err = o.CommandRunner(&o.Runner)
 	return err
 }
 
 func (o *options) getToken() (string, error) {
-	client, ns, err := o.CommonOptions.KubeClientAndDevNamespace()
-	if err != nil {
-		return "", errors.Wrap(err, "failed to get a kubernetes client")
-	}
+	client := o.KubeClient
+	ns := o.Namespace
 
 	selector := githubappLabel + o.organisation
 	listOpts := metav1.ListOptions{
@@ -125,10 +123,9 @@ func (o *options) getToken() (string, error) {
 }
 
 func (o *options) run() (string, error) {
-
 	e := exec.Command(o.Runner.CurrentName(), o.Runner.CurrentArgs()...)
-	e.Stdout = o.Out
-	e.Stderr = o.Err
+	e.Stdout = os.Stdout
+	e.Stderr = os.Stderr
 	os.Setenv("PATH", util.PathWithBinary())
 
 	if len(o.Runner.CurrentEnv()) > 0 {
@@ -150,8 +147,8 @@ func (o *options) run() (string, error) {
 		e.Env = envVars
 	}
 
-	e.Stdout = o.Out
-	e.Stderr = o.Err
+	e.Stdout = os.Stdout
+	e.Stderr = os.Stderr
 
 	var text string
 
@@ -161,6 +158,5 @@ func (o *options) run() (string, error) {
 			errors.Wrapf(err, "failed to run command")
 		}
 	}
-
 	return text, err
 }

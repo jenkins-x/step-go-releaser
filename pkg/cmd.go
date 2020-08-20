@@ -1,16 +1,18 @@
 package pkg
 
 import (
-	"github.com/jenkins-x/jx/pkg/cmd/opts"
-	"github.com/jenkins-x/jx/pkg/util"
+	"github.com/jenkins-x/jx-helpers/pkg/cmdrunner"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
 )
 
 type options struct {
-	Cmd    *cobra.Command
-	Args   []string
-	Runner util.Commander
-	*opts.CommonOptions
+	Cmd           *cobra.Command
+	Args          []string
+	Runner        cmdrunner.Command
+	CommandRunner cmdrunner.CommandRunner
+	KubeClient    kubernetes.Interface
+	Namespace     string
 
 	organisation string
 	revision     string
