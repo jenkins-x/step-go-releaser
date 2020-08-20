@@ -1,11 +1,36 @@
 buildPack: go-cli
-dockerRegistryOwner: jenkinsxio-labs
+dockerRegistryOwner: jenkinsxio
 pipelineConfig:
   pipelines:
+    overrides:
+    - name: helm-template
+      step:
+        sh: echo disabled
+    - name: make-linux
+      step:
+        sh: echo disabled
+        image: golang:1.13
+    - name: make-test
+      step:
+        sh: echo disabled
+        image: golang:1.13
     release:
-      promote:
-        steps:
-          - command: ./promote.sh
-            dir: /workspace/source
-            name: promote-release
-            image: gcr.io/jenkinsxio/builder-go
+      pipeline:
+        stages:
+          - agent:
+              image: gcr.io/jenkinsxio/builder-go
+            name: chart
+            steps:
+              - name: build-and-push-image
+                image: gcr.io/kaniko-project/executor:debug-9912ccbf8d22bbafbf971124600fbb0b13b9cbd6
+                command: /kaniko/executor --cache=true --cache-dir=/workspace --context=/workspace/source --dockerfile=/workspace/source/Dockerfile --destination=gcr.io/$DOCKER_REGISTRY_ORG/step-go-releaser:$VERSION --cache-repo=gcr.io/jenkinsxio/cache
+                env:
+                - name: NO_GOOGLE_APPLICATION_CREDENTIALS
+                  value: "true"
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: ""
+                - name: DOCKER_REGISTRY_ORG
+                  value: jenkinsxio
+              - command: ./promote.sh
+                dir: /workspace/source
+                name: promote-release
