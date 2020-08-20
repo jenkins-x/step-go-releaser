@@ -78,6 +78,8 @@ func (o *options) goReleaser() error {
 	if o.CommandRunner == nil {
 		o.CommandRunner = cmdrunner.DefaultCommandRunner
 	}
+	o.Runner.Out = os.Stdout
+	o.Runner.Err = os.Stderr
 
 	_, err = o.CommandRunner(&o.Runner)
 	return err
