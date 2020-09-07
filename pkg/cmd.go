@@ -36,20 +36,20 @@ const (
 
 var (
 	createLong = `
-wraps goreleaser so we can get the git token from a kubernetes secret 
+wraps goreleaser so we can get the git token from a kubernetes secret
 `
 
 	createExample = `
-step-go-releaser --organisation=jenkins-x-labs --revision=1b59ffc --branch=master --build-date=20200303-22:14:54 --go-version=1.12.17 --root-package=github.com/jenkins-x-labs/gsm-controller --version=0.0.17
+step-goreleaser --organisation=jenkins-x-labs --revision=1b59ffc --branch=master --build-date=20200303-22:14:54 --go-version=1.12.17 --root-package=github.com/jenkins-x-labs/gsm-controller --version=0.0.17
 `
 )
 
-// NewCmdHelloWorld creates a command object for the "hello world" command
+// NewCmdGoReleaser creates a command object for the "hello world" command
 func NewCmdGoReleaser() *cobra.Command {
 	o := &options{}
 
 	cmd := &cobra.Command{
-		Use:     "step-go-releaser",
+		Use:     "step-goreleaser",
 		Short:   "wraps the go releaser tool getting required secrets needed to upload artifacts to GitHub",
 		Long:    createLong,
 		Example: createExample,

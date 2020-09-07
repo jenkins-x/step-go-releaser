@@ -2,7 +2,7 @@
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 SHELL := /bin/bash
-NAME := step-go-releaser
+NAME := step-goreleaser
 BUILD_TARGET = build
 MAIN_SRC_FILE=cmd/main.go
 GO := GO111MODULE=on go
@@ -130,7 +130,7 @@ release: clean build test linux
 	git fetch origin refs/tags/v$(VERSION)
 	#jx step changelog --verbose --header-file=hack/changelog-header.md --version=$(VERSION) --rev=$(PULL_BASE_SHA) --output-markdown=changelog.md --update-release=false
 	# TODO this fails for some reason!
-	#./build/step-go-releaser --organisation=$(ORG) --revision=$(REV) --branch=$(BRANCH) --build-date=$(BUILD_DATE) --go-version=$(GO_VERSION) --root-package=$(ROOT_PACKAGE) --version=v$(VERSION)
+	#./build/step-goreleaser --organisation=$(ORG) --revision=$(REV) --branch=$(BRANCH) --build-date=$(BUILD_DATE) --go-version=$(GO_VERSION) --root-package=$(ROOT_PACKAGE) --version=v$(VERSION)
 	#jxl goreleaser --organisation=$(ORG) --revision=$(REV) --branch=$(BRANCH) --build-date=$(BUILD_DATE) --go-version=$(GO_VERSION) --root-package=$(ROOT_PACKAGE) --version=$(VERSION)
 
 #release: clean build test linux win darwin

@@ -2,7 +2,7 @@ apiVersion: skaffold/v1beta2
 kind: Config
 build:
   artifacts:
-  - image: cbjx-zebramad/step-go-releaser
+  - image: cbjx-zebramad/step-goreleaser
     context: .
     docker: {}
   tagPolicy:
@@ -21,8 +21,8 @@ profiles:
   deploy:
     helm:
       releases:
-      - name: step-go-releaser
-        chartPath: charts/step-go-releaser
+      - name: step-goreleaser
+        chartPath: charts/step-goreleaser
         setValueTemplates:
           image.repository: '{{.DOCKER_REGISTRY}}/{{.IMAGE_NAME}}'
           image.tag: '{{.DIGEST_HEX}}'

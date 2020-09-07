@@ -1,4 +1,4 @@
-module github.com/jenkins-x/step-go-releaser
+module github.com/jenkins-x/step-goreleaser
 
 go 1.13
 
