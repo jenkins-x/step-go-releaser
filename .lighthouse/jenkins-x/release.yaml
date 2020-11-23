@@ -1,0 +1,69 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    lighthouse.jenkins-x.io/prependStepsURL: https://raw.githubusercontent.com/jenkins-x/jx3-pipeline-catalog/005e78cf69b643862344397a635736a51dd1bd89/tasks/git-clone/git-clone.yaml
+  name: release
+spec:
+  pipelineSpec:
+    tasks:
+    - name: from-build-pack
+      resources: {}
+      taskSpec:
+        metadata: {}
+        stepTemplate:
+          name: ""
+          resources:
+            requests:
+              cpu: 400m
+              memory: 600Mi
+          workingDir: /workspace/source
+        steps:
+        - command:
+          - ""
+          image: gcr.io/jenkinsxio-labs-private/jxl:0.0.136
+          name: ""
+          resources: {}
+          workingDir: /home/jenkins/go/src/REPLACE_ME_GIT_PROVIDER/REPLACE_ME_ORG/REPLACE_ME_APP_NAME
+        - image: gcr.io/jenkinsxio/builder-go
+          name: next-version
+          resources: {}
+          script: |
+            #!/usr/bin/env bash
+            jx step next-version --use-git-tag-only
+        - image: gcr.io/jenkinsxio/builder-go
+          name: update-version
+          resources: {}
+          script: |
+            #!/usr/bin/env bash
+            jx step tag --version $(cat VERSION) --no-apply
+        - image: gcr.io/jenkinsxio/builder-go
+          name: tag-version
+          resources: {}
+          script: |
+            #!/usr/bin/env bash
+            jx step tag --version $(cat VERSION)
+        - image: gcr.io/jenkinsxio/jx-boot:3.0.738
+          name: jx-variables
+          resources: {}
+          script: |
+            #!/usr/bin/env sh
+            jx gitops variables
+        - image: golang:1.13
+          name: build-make-build
+          resources: {}
+          script: |
+            #!/bin/sh
+            make release
+        - image: gcr.io/kaniko-project/executor:debug-v1.3.0
+          name: build-container-build
+          resources: {}
+          script: |
+            #!/busybox/sh
+            source .jx/variables.sh
+            cp /tekton/creds-secrets/tekton-container-registry-auth/.dockerconfigjson /kaniko/.docker/config.json
+            /kaniko/executor $KANIKO_FLAGS --context=/workspace/source --dockerfile=/workspace/source/Dockerfile --destination=$DOCKER_REGISTRY/$DOCKER_REGISTRY_ORG/$APP_NAME:$VERSION
+  podTemplate: {}
+  serviceAccountName: tekton-bot
+  timeout: 240h0m0s
+status: {}
