@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/jenkins-x/step-go-releaser/pkg"
+	"github.com/jenkins-x/step-goreleaser/pkg"
 )
 
 // Entrypoint for the command
